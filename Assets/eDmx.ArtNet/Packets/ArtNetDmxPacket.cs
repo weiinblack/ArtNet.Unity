@@ -24,8 +24,7 @@ namespace ArtNet.Packets
         }
 
         #region Packet Properties
-
-        [UnityEngine.SerializeField]
+        
         private byte sequence = 0;
 
         public byte Sequence
@@ -33,8 +32,7 @@ namespace ArtNet.Packets
             get { return sequence; }
             set { sequence = value; }
         }
-
-        [UnityEngine.SerializeField]
+        
         private byte physical = 0;
 
         public byte Physical

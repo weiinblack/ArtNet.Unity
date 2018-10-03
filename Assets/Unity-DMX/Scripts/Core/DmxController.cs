@@ -17,8 +17,8 @@ public class DmxController : MonoBehaviour
     [Header("dmx devices")]
     public UniverseDevices[] universes;
 
-    [Header("artNet data")]
     ArtNetSocket artnet;
+    [Header("send/received DMX data for debug")]
     [SerializeField] ArtNetDmxPacket latestDMX;
     [SerializeField] ArtNetDmxPacket dmxToSend;
     byte[] _dmxData;
