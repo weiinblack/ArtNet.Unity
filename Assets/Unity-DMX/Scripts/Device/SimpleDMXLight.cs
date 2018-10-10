@@ -18,6 +18,7 @@ public class SimpleDMXLight : DMXDevice
         color.r = dmxData[0] / 256f;
         color.g = dmxData[1] / 256f;
         color.b = dmxData[2] / 256f;
+        color += Color.white * 0.5f * dmxData[3] / 256f;
 
         light.color = color;
     }

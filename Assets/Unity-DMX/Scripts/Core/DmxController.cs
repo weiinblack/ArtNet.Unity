@@ -16,21 +16,30 @@ public class DmxController : MonoBehaviour
 
     [Header("dmx devices")]
     public UniverseDevices[] universes;
+    public bool isServer;
 
     ArtNetSocket artnet;
-    [Header("send/received DMX data for debug")]
-    [SerializeField] ArtNetDmxPacket latestDMX;
+    [Header("send/recieved DMX data for debug")]
+    [SerializeField] ArtNetDmxPacket latestReceivedDMX;
     [SerializeField] ArtNetDmxPacket dmxToSend;
     byte[] _dmxData;
 
     Dictionary<int, byte[]> dmxDataMap;
 
+    [ContextMenu("send DMX")]
+    public void Send()
+    {
+        if (useBroadcast && isServer)
+            artnet.Send(dmxToSend);
+        else
+            artnet.Send(dmxToSend, remote);
+    }
     public void Send(short universe, byte[] dmxData)
     {
         dmxToSend.Universe = universe;
-        dmxToSend.DmxData = dmxData;
+        System.Buffer.BlockCopy(dmxData, 0, dmxToSend.DmxData, 0, dmxData.Length);
 
-        if (useBroadcast)
+        if (useBroadcast && isServer)
             artnet.Send(dmxToSend);
         else
             artnet.Send(dmxToSend, remote);
@@ -42,16 +51,22 @@ public class DmxController : MonoBehaviour
             u.Initialize();
     }
 
+    public bool newPacket;
     void Start()
     {
-        var artnet = new ArtNetSocket();
-        artnet.Open(IPAddress.Parse("127.0.0.1"), IPAddress.Parse("255.255.255.0"));
+        artnet = new ArtNetSocket();
+        if (isServer)
+            artnet.Open(FindFromHostName("localhost"), null);
+        //サブネットマスクを設定すると、自分に送らないアドレスを設定してくれる（便利！）
+        //なのだが、デバッグがめんどくさくなる
+        dmxToSend.DmxData = new byte[512];
 
         artnet.NewPacket += (object sender, NewPacketEventArgs<ArtNetPacket> e) =>
         {
+            newPacket = true;
             if (e.Packet.OpCode == ArtNet.Enums.ArtNetOpCodes.Dmx)
             {
-                var packet = latestDMX = e.Packet as ArtNetDmxPacket;
+                var packet = latestReceivedDMX = e.Packet as ArtNetDmxPacket;
 
                 if (packet.DmxData != _dmxData)
                     _dmxData = packet.DmxData;
@@ -64,10 +79,15 @@ public class DmxController : MonoBehaviour
             }
         };
 
-        if (!useBroadcast)
-            remote = new IPEndPoint(FindFromHostName(remoteIP), 6454);
+        if (!useBroadcast || !isServer)
+            remote = new IPEndPoint(FindFromHostName(remoteIP), ArtNetSocket.Port);
 
         dmxDataMap = new Dictionary<int, byte[]>();
+    }
+
+    private void OnDestroy()
+    {
+        artnet.Close();
     }
 
     private void Update()
@@ -132,6 +152,7 @@ public class DmxController : MonoBehaviour
                 {
                     d.startChannel = startChannel;
                     startChannel += d.NumChannels;
+                    d.name = string.Format("{0}:({1},{2:d3}-{3:d3})", d.GetType().ToString(), universe, d.startChannel, startChannel - 1);
                 }
             if (512 < startChannel)
                 Debug.LogErrorFormat("The number({0}) of channels of the universe {1} exceeds the upper limit(512 channels)!", startChannel, universe);

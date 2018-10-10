@@ -1,13 +1,8 @@
 ﻿using ArtNet.IO;
 using ArtNet.Packets;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ArtNet.Sockets
 {
@@ -58,7 +53,7 @@ namespace ArtNet.Sockets
         {
             get
             {
-                if (LocalSubnetMask == null)
+                if (LocalSubnetMask == null || LocalIP == null)
                     return IPAddress.Broadcast;
                 return GetBroadcastAddress(LocalIP, LocalSubnetMask);
             }

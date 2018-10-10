@@ -8,6 +8,8 @@ Receive and Send DMX512 via ArtNet.
 
 ## Usage
 
+### Send DMX
+
 ```csharp
 DMXController controller;
 int universe;
