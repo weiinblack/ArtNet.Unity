@@ -8,6 +8,8 @@ Receive and Send DMX512 via ArtNet.
 
 ![anim](anim.gif)
 
+![photo](photo.jpg)
+
 ## Usage
 
 ### Send DMX
