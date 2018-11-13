@@ -6,6 +6,8 @@ Forked from https://github.com/MikeCodesDotNET/ArtNet.Net
 
 Receive and Send DMX512 via ArtNet.
 
+![anim](anim.gif)
+
 ## Usage
 
 ### Send DMX
